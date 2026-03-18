@@ -14,6 +14,7 @@
     "@fortawesome/free-brands-svg-icons": "^7.2.0",
     "@fortawesome/free-solid-svg-icons": "^7.2.0",
     "@fortawesome/react-fontawesome": "^3.2.0",
+    "@cloudflare/next-on-pages": "1.13.16",
     "bcryptjs": "^3.0.3",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.3.0",
