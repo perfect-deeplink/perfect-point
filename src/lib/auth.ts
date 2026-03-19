@@ -1,15 +1,20 @@
-import jwt from 'jsonwebtoken';
+import { SignJWT, jwtVerify } from 'jose';
 import { NextRequest } from 'next/server';
 
 const JWT_SECRET = process.env.JWT_SECRET || 'ok-academy-secret';
+const secret = new TextEncoder().encode(JWT_SECRET);
 
-export function signToken(payload: object): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: '24h' });
+export async function signToken(payload: object): Promise<string> {
+  return new SignJWT(payload as Record<string, unknown>)
+    .setProtectedHeader({ alg: 'HS256' })
+    .setExpirationTime('24h')
+    .sign(secret);
 }
 
-export function verifyToken(token: string) {
+export async function verifyToken(token: string): Promise<{ id: string; username: string } | null> {
   try {
-    return jwt.verify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, secret);
+    return payload as unknown as { id: string; username: string };
   } catch {
     return null;
   }
@@ -23,8 +28,8 @@ export function getTokenFromRequest(req: NextRequest): string | null {
   return null;
 }
 
-export function isAuthenticated(req: NextRequest): boolean {
+export async function isAuthenticated(req: NextRequest): Promise<boolean> {
   const token = getTokenFromRequest(req);
   if (!token) return false;
-  return !!verifyToken(token);
+  return !!(await verifyToken(token));
 }

@@ -1,17 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import { Testimonial } from '@/lib/models';
+import { getDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
+
+export const runtime = 'edge';
 
 export async function GET(req: NextRequest) {
   try {
-    await dbConnect();
+    const db = getDb();
+    const isAdmin = await isAuthenticated(req);
 
-    const isAdmin = isAuthenticated(req);
-    const filter = isAdmin ? {} : { approved: true };
-    const testimonials = await Testimonial.find(filter).sort({ createdAt: -1 });
+    const query = isAdmin
+      ? 'SELECT * FROM testimonials ORDER BY created_at DESC'
+      : 'SELECT * FROM testimonials WHERE approved = 1 ORDER BY created_at DESC';
 
-    return NextResponse.json({ success: true, data: testimonials });
+    const { results } = await db.prepare(query).all<Record<string, unknown>>();
+
+    const data = results.map((row: Record<string, unknown>) => ({
+      ...row,
+      current: row.current_position,
+      createdAt: row.created_at,
+    }));
+
+    return NextResponse.json({ success: true, data });
   } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to fetch testimonials' },
@@ -22,12 +32,29 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await dbConnect();
+    const db = getDb();
     const body = await req.json();
-    const testimonial = await Testimonial.create(body);
+    const now = new Date().toISOString();
 
+    const result = await db.prepare(
+      'INSERT INTO testimonials (name, course, rating, feedback, photo, current_position, category, approved, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    ).bind(
+      body.name,
+      body.course,
+      body.rating,
+      body.feedback,
+      body.photo ?? null,
+      body.current ?? null,
+      body.category ?? null,
+      body.approved ? 1 : 0,
+      now
+    ).run();
+
+    const row = await db.prepare('SELECT * FROM testimonials WHERE id = ?').bind(result.meta.last_row_id).first();
+
+    const rowObj = row as Record<string, unknown>;
     return NextResponse.json(
-      { success: true, data: testimonial },
+      { success: true, data: { ...rowObj, current: rowObj.current_position, createdAt: rowObj.created_at } },
       { status: 201 }
     );
   } catch {

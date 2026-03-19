@@ -26,11 +26,11 @@ export default function AdminPage() {
 
   // Data
   const [stats, setStats] = useState({ students: 0, blog: 0, testimonials: 0, courses: 0 });
-  const [students, setStudents] = useState<Array<{ _id: string; name: string; achievement: string; photo?: string }>>([]);
-  const [blogPosts, setBlogPosts] = useState<Array<{ _id: string; title: string; category: string; published: boolean; createdAt: string; tags?: string[] }>>([]);
-  const [testimonials, setTestimonials] = useState<Array<{ _id: string; name: string; course: string; rating: number; feedback: string }>>([]);
-  const [teachers, setTeachers] = useState<Array<{ _id: string; name: string; designation: string; experience: string; photo?: string }>>([]);
-  const [courses, setCourses] = useState<Array<{ _id: string; title: string; description: string; category: string; duration: string; price: string; features: string[]; badge: string; level: string; featured: boolean; active: boolean }>>([]);
+  const [students, setStudents] = useState<Array<{ id: number; name: string; achievement: string; photo?: string }>>([]);
+  const [blogPosts, setBlogPosts] = useState<Array<{ id: number; title: string; category: string; published: boolean; createdAt: string; tags?: string[] }>>([]);
+  const [testimonials, setTestimonials] = useState<Array<{ id: number; name: string; course: string; rating: number; feedback: string }>>([]);
+  const [teachers, setTeachers] = useState<Array<{ id: number; name: string; designation: string; experience: string; photo?: string }>>([]);
+  const [courses, setCourses] = useState<Array<{ id: number; title: string; description: string; category: string; duration: string; price: string; features: string[]; badge: string; level: string; featured: boolean; active: boolean }>>([]);
 
   // Modal
   const [modal, setModal] = useState<ModalData>({ type: null });
@@ -90,7 +90,7 @@ export default function AdminPage() {
     if (t) {
       fetch('/api/auth', { headers: { 'Authorization': `Bearer ${t}` } })
         .then(r => r.json())
-        .then(d => { if (d.success) { setToken(t); setIsLoggedIn(true); } else localStorage.removeItem('admin_token'); })
+        .then((d) => { const data = d as { success: boolean }; if (data.success) { setToken(t); setIsLoggedIn(true); } else localStorage.removeItem('admin_token'); })
         .catch(() => localStorage.removeItem('admin_token'));
     }
   }, []);
@@ -197,19 +197,19 @@ export default function AdminPage() {
     try {
       if (modal.type === 'student') {
         const body = { name: formName, achievement: formField2 };
-        if (modal.data?._id) await fetch(`/api/students/${modal.data._id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
+        if (modal.data?.id) await fetch(`/api/students/${modal.data.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
         else await fetch('/api/students', { method: 'POST', headers: h, body: JSON.stringify(body) });
       } else if (modal.type === 'testimonial') {
         const body = { name: formName, course: formField2, feedback: formField3, rating: formRating, approved: true };
-        if (modal.data?._id) await fetch(`/api/testimonials/${modal.data._id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
+        if (modal.data?.id) await fetch(`/api/testimonials/${modal.data.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
         else await fetch('/api/testimonials', { method: 'POST', headers: h, body: JSON.stringify(body) });
       } else if (modal.type === 'teacher') {
         const body = { name: formName, designation: formField2, experience: formField3 };
-        if (modal.data?._id) await fetch(`/api/teachers/${modal.data._id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
+        if (modal.data?.id) await fetch(`/api/teachers/${modal.data.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
         else await fetch('/api/teachers', { method: 'POST', headers: h, body: JSON.stringify(body) });
       } else if (modal.type === 'course') {
         const body = { title: formName, description: formField2, duration: formField3, price: formField4, category: formField5 || 'general', features: formField6.split(',').map(f => f.trim()).filter(Boolean), active: true };
-        if (modal.data?._id) await fetch(`/api/courses/${modal.data._id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
+        if (modal.data?.id) await fetch(`/api/courses/${modal.data.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
         else await fetch('/api/courses', { method: 'POST', headers: h, body: JSON.stringify(body) });
       }
       setModal({ type: null });
@@ -231,7 +231,7 @@ export default function AdminPage() {
     const h = authHeaders();
     const body = { title: postTitle, content: postContent, category: postCategory, tags: postTags.split(',').map(t => t.trim()).filter(Boolean), published: publish, excerpt: postContent.substring(0, 150) };
     try {
-      if (editingPost?._id) await fetch(`/api/blog/${editingPost._id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
+      if (editingPost?.id) await fetch(`/api/blog/${editingPost.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
       else await fetch('/api/blog', { method: 'POST', headers: h, body: JSON.stringify(body) });
       setShowBlogEditor(false);
       setEditingPost(null);
@@ -389,7 +389,7 @@ export default function AdminPage() {
             {courses.length === 0 ? <p className="text-gray-400 italic">No courses added yet.</p> : (
               <div className="space-y-4">
                 {courses.map(c => (
-                  <div key={c._id} className="bg-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <div key={c.id} className="bg-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                     <div>
                       <h4 className="font-bold text-secondary">{c.title}</h4>
                       <p className="text-sm text-gray-500">{c.description}</p>
@@ -402,7 +402,7 @@ export default function AdminPage() {
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => openModal('course', c as unknown as Record<string, unknown>)} className="p-2 text-primary hover:bg-blue-50 rounded"><FontAwesomeIcon icon={faEdit} /></button>
-                      <button onClick={() => deleteItem('courses', c._id)} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
+                      <button onClick={() => deleteItem('courses', String(c.id))} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
                     </div>
                   </div>
                 ))}
@@ -421,13 +421,13 @@ export default function AdminPage() {
             {students.length === 0 ? <p className="text-gray-400 italic">No students added yet.</p> : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {students.map(s => (
-                  <div key={s._id} className="bg-white p-5 rounded-xl shadow-md text-center">
+                  <div key={s.id} className="bg-white p-5 rounded-xl shadow-md text-center">
                     <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl text-gray-300">👤</div>
                     <h4 className="font-bold text-secondary">{s.name}</h4>
                     <p className="text-sm text-gray-500">{s.achievement}</p>
                     <div className="flex justify-center gap-2 mt-3">
                       <button onClick={() => openModal('student', s)} className="p-2 text-primary hover:bg-blue-50 rounded"><FontAwesomeIcon icon={faEdit} /></button>
-                      <button onClick={() => deleteItem('students', s._id)} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
+                      <button onClick={() => deleteItem('students', String(s.id))} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
                     </div>
                   </div>
                 ))}
@@ -448,15 +448,15 @@ export default function AdminPage() {
                 {blogPosts.length === 0 ? <p className="text-gray-400 italic">No blog posts yet.</p> : (
                   <div className="space-y-4">
                     {blogPosts.map(p => (
-                      <div key={p._id} className="bg-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                      <div key={p.id} className="bg-white p-5 rounded-xl shadow-md flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
                         <div>
                           <h4 className="font-bold text-secondary">{p.title}</h4>
                           <p className="text-xs text-gray-400">{new Date(p.createdAt).toLocaleDateString()} • {p.category}</p>
                           <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs ${p.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{p.published ? 'Published' : 'Draft'}</span>
                         </div>
                         <div className="flex gap-2">
-                          <button onClick={() => { setEditingPost(p); setPostTitle(p.title); setPostCategory(p.category); setPostTags(p.tags?.join(', ') || ''); setShowBlogEditor(true); fetch(`/api/blog/${p._id}`).then(r => r.json()).then(d => { if (d.data?.content) setPostContent(d.data.content); }); }} className="p-2 text-primary hover:bg-blue-50 rounded"><FontAwesomeIcon icon={faEdit} /></button>
-                          <button onClick={() => deleteItem('blog', p._id)} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
+                          <button onClick={() => { setEditingPost(p); setPostTitle(p.title); setPostCategory(p.category); setPostTags(p.tags?.join(', ') || ''); setShowBlogEditor(true); fetch(`/api/blog/${p.id}`).then(r => r.json()).then(d => { if (d.data?.content) setPostContent(d.data.content); }); }} className="p-2 text-primary hover:bg-blue-50 rounded"><FontAwesomeIcon icon={faEdit} /></button>
+                          <button onClick={() => deleteItem('blog', String(p.id))} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
                         </div>
                       </div>
                     ))}
@@ -503,13 +503,13 @@ export default function AdminPage() {
             {testimonials.length === 0 ? <p className="text-gray-400 italic">No testimonials yet.</p> : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {testimonials.map(t => (
-                  <div key={t._id} className="bg-white p-5 rounded-xl shadow-md">
+                  <div key={t.id} className="bg-white p-5 rounded-xl shadow-md">
                     <div className="text-warning mb-1">{'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}</div>
                     <p className="text-gray-600 italic text-sm mb-2">&ldquo;{t.feedback}&rdquo;</p>
                     <p className="text-sm font-bold text-secondary">{t.name} - {t.course}</p>
                     <div className="flex gap-2 mt-3">
                       <button onClick={() => openModal('testimonial', t)} className="p-2 text-primary hover:bg-blue-50 rounded"><FontAwesomeIcon icon={faEdit} /></button>
-                      <button onClick={() => deleteItem('testimonials', t._id)} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
+                      <button onClick={() => deleteItem('testimonials', String(t.id))} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
                     </div>
                   </div>
                 ))}
@@ -528,14 +528,14 @@ export default function AdminPage() {
             {teachers.length === 0 ? <p className="text-gray-400 italic">No teachers added yet.</p> : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {teachers.map(t => (
-                  <div key={t._id} className="bg-white p-5 rounded-xl shadow-md text-center">
+                  <div key={t.id} className="bg-white p-5 rounded-xl shadow-md text-center">
                     <div className="w-20 h-20 bg-gray-100 rounded-full mx-auto mb-3 flex items-center justify-center text-3xl text-gray-300">👤</div>
                     <h4 className="font-bold text-secondary">{t.name}</h4>
                     <p className="text-sm text-primary">{t.designation}</p>
                     <p className="text-xs text-gray-400">{t.experience}</p>
                     <div className="flex justify-center gap-2 mt-3">
                       <button onClick={() => openModal('teacher', t)} className="p-2 text-primary hover:bg-blue-50 rounded"><FontAwesomeIcon icon={faEdit} /></button>
-                      <button onClick={() => deleteItem('teachers', t._id)} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
+                      <button onClick={() => deleteItem('teachers', String(t.id))} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
                     </div>
                   </div>
                 ))}
@@ -800,7 +800,7 @@ export default function AdminPage() {
           <div className="bg-white p-6 rounded-2xl w-full max-w-md animate-fadeIn" onClick={e => e.stopPropagation()}>
             <h3 className="text-lg font-bold text-secondary mb-4">
               <FontAwesomeIcon icon={modal.type === 'student' ? faUsers : modal.type === 'testimonial' ? faComments : modal.type === 'course' ? faGraduationCap : faChalkboardTeacher} className="text-primary mr-2" />
-              {modal.data?._id ? 'Edit' : 'Add'} {modal.type === 'student' ? 'Student' : modal.type === 'testimonial' ? 'Testimonial' : modal.type === 'course' ? 'Course' : 'Teacher'}
+              {modal.data?.id ? 'Edit' : 'Add'} {modal.type === 'student' ? 'Student' : modal.type === 'testimonial' ? 'Testimonial' : modal.type === 'course' ? 'Course' : 'Teacher'}
             </h3>
             <form onSubmit={saveModalData}>
               <div className="mb-3">

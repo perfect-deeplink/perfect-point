@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChalkboardTeacher, faUser, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 interface Teacher {
-  _id: string;
+  id: number;
   name: string;
   designation: string;
   experience: string;
@@ -55,7 +55,7 @@ export default function TeachersSection() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
           {teachers.map((teacher) => (
             <div
-              key={teacher._id}
+              key={teacher.id}
               className="bg-[#f8f9fa] p-6 rounded-[10px] text-center transition-transform duration-300 hover:-translate-y-1"
             >
               {teacher.photo ? (

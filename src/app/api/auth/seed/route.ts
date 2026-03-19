@@ -1,16 +1,17 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import dbConnect from '@/lib/mongodb';
-import { Admin } from '@/lib/models';
+import { getDb } from '@/lib/db';
+
+export const runtime = 'edge';
 
 export async function GET() {
   try {
-    await dbConnect();
+    const db = getDb();
 
     // Delete all existing admins and create a fresh one
-    await Admin.deleteMany({});
+    await db.prepare('DELETE FROM admins').run();
     const hashedPassword = await bcrypt.hash('admin123', 10);
-    await Admin.create({ username: 'admin', password: hashedPassword });
+    await db.prepare('INSERT INTO admins (username, password) VALUES (?, ?)').bind('admin', hashedPassword).run();
 
     return NextResponse.json({
       success: true,

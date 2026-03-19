@@ -1,34 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import { Teacher } from '@/lib/models';
+import { getDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
+
+export const runtime = 'edge';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isAuthenticated(req)) {
+    if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    await dbConnect();
+    const { id } = await params;
+    const db = getDb();
     const body = await req.json();
-    const teacher = await Teacher.findByIdAndUpdate(params.id, body, {
-      new: true,
-    });
 
-    if (!teacher) {
+    const { meta } = await db.prepare(
+      'UPDATE teachers SET name = ?, designation = ?, experience = ?, photo = ? WHERE id = ?'
+    ).bind(body.name, body.designation, body.experience, body.photo, id).run();
+
+    if (!meta.changes) {
       return NextResponse.json(
         { success: false, error: 'Teacher not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: teacher });
+    const row = await db.prepare('SELECT * FROM teachers WHERE id = ?').bind(id).first();
+    const rowObj = row as Record<string, unknown>;
+    return NextResponse.json({ success: true, data: { ...rowObj, createdAt: rowObj.created_at } });
   } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to update teacher' },
@@ -39,20 +44,21 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isAuthenticated(req)) {
+    if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    await dbConnect();
-    const teacher = await Teacher.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const db = getDb();
+    const { meta } = await db.prepare('DELETE FROM teachers WHERE id = ?').bind(id).run();
 
-    if (!teacher) {
+    if (!meta.changes) {
       return NextResponse.json(
         { success: false, error: 'Teacher not found' },
         { status: 404 }

@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import dbConnect from '@/lib/mongodb';
-import { Admin } from '@/lib/models';
+import { getDb } from '@/lib/db';
 import { signToken, isAuthenticated } from '@/lib/auth';
+
+export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
-    await dbConnect();
+    const db = getDb();
     const { username, password } = await req.json();
 
     if (!username || !password) {
@@ -17,13 +18,13 @@ export async function POST(req: NextRequest) {
     }
 
     // Auto-create default admin if none exists
-    const adminCount = await Admin.countDocuments();
-    if (adminCount === 0) {
+    const { count } = await db.prepare('SELECT COUNT(*) as count FROM admins').first<{ count: number }>() ?? { count: 0 };
+    if (count === 0) {
       const hashedPassword = await bcrypt.hash('admin123', 10);
-      await Admin.create({ username: 'admin', password: hashedPassword });
+      await db.prepare('INSERT INTO admins (username, password) VALUES (?, ?)').bind('admin', hashedPassword).run();
     }
 
-    const admin = await Admin.findOne({ username });
+    const admin = await db.prepare('SELECT * FROM admins WHERE username = ?').bind(username).first<{ id: number; username: string; password: string }>();
 
     if (!admin) {
       return NextResponse.json(
@@ -40,7 +41,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const token = signToken({ id: admin._id, username: admin.username });
+    const token = await signToken({ id: String(admin.id), username: admin.username });
 
     return NextResponse.json({
       success: true,
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    if (!isAuthenticated(req)) {
+    if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }

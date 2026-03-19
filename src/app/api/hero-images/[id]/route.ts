@@ -1,24 +1,26 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import { HeroImage } from '@/lib/models';
+import { getDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
+
+export const runtime = 'edge';
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isAuthenticated(req)) {
+    if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    await dbConnect();
-    const image = await HeroImage.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const db = getDb();
+    const { meta } = await db.prepare('DELETE FROM hero_images WHERE id = ?').bind(id).run();
 
-    if (!image) {
+    if (!meta.changes) {
       return NextResponse.json(
         { success: false, error: 'Hero image not found' },
         { status: 404 }

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import { Newsletter } from '@/lib/models';
+import { getDb } from '@/lib/db';
+
+export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
-    await dbConnect();
+    const db = getDb();
     const { email } = await req.json();
 
     if (!email) {
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const existing = await Newsletter.findOne({ email });
+    const existing = await db.prepare('SELECT id FROM newsletters WHERE email = ?').bind(email).first();
     if (existing) {
       return NextResponse.json(
         { success: false, error: 'Email already subscribed' },
@@ -22,10 +23,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const subscription = await Newsletter.create({ email });
+    const now = new Date().toISOString();
+
+    const result = await db.prepare(
+      'INSERT INTO newsletters (email, created_at) VALUES (?, ?)'
+    ).bind(email, now).run();
+
+    const row = await db.prepare('SELECT * FROM newsletters WHERE id = ?').bind(result.meta.last_row_id).first();
 
     return NextResponse.json(
-      { success: true, data: subscription },
+      { success: true, data: row },
       { status: 201 }
     );
   } catch {

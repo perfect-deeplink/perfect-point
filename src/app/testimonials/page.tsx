@@ -5,7 +5,7 @@ import { faStar, faStarHalfAlt, faUser, faVideo, faPlayCircle, faCommentAlt, faT
 // Use solid star outline style instead of regular icon
 
 interface TestimonialData {
-  _id?: string;
+  id?: number;
   name: string;
   course: string;
   rating: number;

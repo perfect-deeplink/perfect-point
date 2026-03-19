@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSearch, faFolder, faFire, faNewspaper, faTags, faCalendar, faBriefcase, faGraduationCap, faHandshake, faMapMarkerAlt, faSpinner } from '@fortawesome/free-solid-svg-icons';
 
 interface BlogPost {
-  _id?: string;
   id?: number;
   title: string;
   excerpt?: string;

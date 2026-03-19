@@ -5,7 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrophy, faUserGraduate } from '@fortawesome/free-solid-svg-icons';
 
 interface Student {
-  _id: string;
+  id: number;
   name: string;
   achievement: string;
   photo?: string;
@@ -44,7 +44,7 @@ export default function TopStudents() {
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
           {students.map((student) => (
             <div
-              key={student._id}
+              key={student.id}
               className="bg-white rounded-xl shadow-md p-6 text-center hover:-translate-y-1 transition"
             >
               {student.photo ? (

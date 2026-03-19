@@ -12,7 +12,7 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 
 interface Testimonial {
-  _id: string;
+  id: number;
   name: string;
   course: string;
   rating: number;
@@ -85,7 +85,7 @@ export default function TestimonialsPreview() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {testimonials.map((t) => (
             <div
-              key={t._id}
+              key={t.id}
               className="bg-white rounded-xl shadow-md p-6 hover:-translate-y-1 transition"
             >
               <StarRating rating={t.rating} />

@@ -1,9 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAuthenticated } from '@/lib/auth';
 
+export const runtime = 'edge';
+
 export async function POST(req: NextRequest) {
   try {
-    if (!isAuthenticated(req)) {
+    if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }

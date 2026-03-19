@@ -52,7 +52,7 @@ interface HomepageData {
 }
 
 interface CourseData {
-  _id: string;
+  id: number;
   title: string;
   description: string;
   duration: string;
@@ -60,7 +60,7 @@ interface CourseData {
 }
 
 interface BlogData {
-  _id: string;
+  id: number;
   title: string;
   excerpt?: string;
   content?: string;
@@ -142,7 +142,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {courses.map((course) => (
                 <div
-                  key={course._id}
+                  key={course.id}
                   className="bg-white rounded-xl shadow-md p-6 hover:-translate-y-1 transition border border-gray-100"
                 >
                   <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-4">
@@ -207,7 +207,7 @@ export default function Home() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {blogPosts.map((post) => (
                 <div
-                  key={post._id}
+                  key={post.id}
                   className="bg-white rounded-xl shadow-md p-6 hover:-translate-y-1 transition border border-gray-100"
                 >
                   <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-4">

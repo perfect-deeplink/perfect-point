@@ -1,19 +1,20 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import dbConnect from '@/lib/mongodb';
-import { Admin } from '@/lib/models';
+import { getDb } from '@/lib/db';
 import { isAuthenticated, getTokenFromRequest, verifyToken } from '@/lib/auth';
+
+export const runtime = 'edge';
 
 export async function PUT(req: NextRequest) {
   try {
-    if (!isAuthenticated(req)) {
+    if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    await dbConnect();
+    const db = getDb();
     const { currentPassword, newPassword } = await req.json();
 
     if (!currentPassword || !newPassword) {
@@ -24,8 +25,8 @@ export async function PUT(req: NextRequest) {
     }
 
     const token = getTokenFromRequest(req);
-    const decoded = verifyToken(token!) as { id: string };
-    const admin = await Admin.findById(decoded.id);
+    const decoded = await verifyToken(token!) as { id: string; username: string };
+    const admin = await db.prepare('SELECT * FROM admins WHERE id = ?').bind(decoded.id).first<{ id: number; username: string; password: string }>();
 
     if (!admin) {
       return NextResponse.json(
@@ -42,8 +43,8 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    admin.password = await bcrypt.hash(newPassword, 10);
-    await admin.save();
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await db.prepare('UPDATE admins SET password = ? WHERE id = ?').bind(hashedPassword, decoded.id).run();
 
     return NextResponse.json({
       success: true,

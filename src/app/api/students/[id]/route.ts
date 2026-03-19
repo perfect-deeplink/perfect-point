@@ -1,34 +1,39 @@
 import { NextRequest, NextResponse } from 'next/server';
-import dbConnect from '@/lib/mongodb';
-import { Student } from '@/lib/models';
+import { getDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
+
+export const runtime = 'edge';
 
 export async function PUT(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isAuthenticated(req)) {
+    if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    await dbConnect();
+    const { id } = await params;
+    const db = getDb();
     const body = await req.json();
-    const student = await Student.findByIdAndUpdate(params.id, body, {
-      new: true,
-    });
 
-    if (!student) {
+    const { meta } = await db.prepare(
+      'UPDATE students SET name = ?, achievement = ?, photo = ? WHERE id = ?'
+    ).bind(body.name, body.achievement, body.photo, id).run();
+
+    if (!meta.changes) {
       return NextResponse.json(
         { success: false, error: 'Student not found' },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, data: student });
+    const row = await db.prepare('SELECT * FROM students WHERE id = ?').bind(id).first();
+    const rowObj = row as Record<string, unknown>;
+    return NextResponse.json({ success: true, data: { ...rowObj, createdAt: rowObj.created_at } });
   } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to update student' },
@@ -39,20 +44,21 @@ export async function PUT(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    if (!isAuthenticated(req)) {
+    if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },
         { status: 401 }
       );
     }
 
-    await dbConnect();
-    const student = await Student.findByIdAndDelete(params.id);
+    const { id } = await params;
+    const db = getDb();
+    const { meta } = await db.prepare('DELETE FROM students WHERE id = ?').bind(id).run();
 
-    if (!student) {
+    if (!meta.changes) {
       return NextResponse.json(
         { success: false, error: 'Student not found' },
         { status: 404 }
