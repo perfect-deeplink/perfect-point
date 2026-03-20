@@ -89,9 +89,14 @@ export default function TestimonialsPage() {
                   <Stars rating={t.rating} />
                   <p className="text-gray-600 italic my-3 text-sm leading-relaxed">&ldquo;{t.feedback}&rdquo;</p>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-accent to-purple rounded-full flex items-center justify-center">
-                      <FontAwesomeIcon icon={faUser} className="text-white text-sm" />
-                    </div>
+                    {t.photo && t.photo.startsWith('data:image') ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={t.photo} alt={t.name} className="w-10 h-10 rounded-full object-cover shadow-sm border border-gray-100" />
+                    ) : (
+                      <div className="w-10 h-10 bg-gradient-to-br from-accent to-purple rounded-full flex items-center justify-center shadow-sm">
+                        <FontAwesomeIcon icon={faUser} className="text-white text-sm" />
+                      </div>
+                    )}
                     <div>
                       <h4 className="font-bold text-secondary text-sm">{t.name}</h4>
                       <p className="text-xs text-gray-400">{t.course} Student</p>

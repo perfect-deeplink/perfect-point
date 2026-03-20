@@ -64,6 +64,7 @@ interface BlogData {
   title: string;
   excerpt?: string;
   content?: string;
+  featuredImage?: string;
 }
 
 const defaultSections = { hero: true, topStudents: true, features: true, courses: true, testimonials: true, blog: true, cta: true };
@@ -208,14 +209,21 @@ export default function Home() {
               {blogPosts.map((post) => (
                 <div
                   key={post.id}
-                  className="bg-white rounded-xl shadow-md p-6 hover:-translate-y-1 transition border border-gray-100"
+                  className="bg-white rounded-xl shadow-md p-6 flex flex-col hover:-translate-y-1 transition border border-gray-100 relative overflow-hidden"
                 >
-                  <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-4">
-                    <FontAwesomeIcon
-                      icon={faNewspaper}
-                      className="w-6 h-6 text-accent"
-                    />
-                  </div>
+                  {post.featuredImage && post.featuredImage.startsWith('data:image') ? (
+                    <div className="-mx-6 -mt-6 mb-4 h-40 bg-gray-100">
+                       {/* eslint-disable-next-line @next/next/no-img-element */}
+                       <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="w-14 h-14 rounded-full bg-accent/10 flex items-center justify-center mb-4">
+                      <FontAwesomeIcon
+                        icon={faNewspaper}
+                        className="w-6 h-6 text-accent"
+                      />
+                    </div>
+                  )}
                   <h3 className="text-lg font-semibold text-secondary mb-2">
                     {post.title}
                   </h3>

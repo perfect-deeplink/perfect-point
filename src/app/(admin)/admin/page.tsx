@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTachometerAlt, faUsers, faBlog, faComments, faChalkboardTeacher, faCog, faSignOutAlt, faPlus, faEdit, faTrash, faSave, faLock, faEye, faEyeSlash, faSignInAlt, faUserShield, faSpinner, faTimes, faKey, faPhone, faGraduationCap, faHome, faColumns, faLink } from '@fortawesome/free-solid-svg-icons';
 import { faFacebook, faInstagram, faYoutube } from '@fortawesome/free-brands-svg-icons';
-
+import ImageUploader from '@/components/ImageUploader';
 type Section = 'dashboard' | 'courses' | 'students' | 'blog' | 'testimonials' | 'teachers' | 'homepage' | 'footer' | 'settings';
 
 interface ModalData {
@@ -27,10 +27,10 @@ export default function AdminPage() {
   // Data
   const [stats, setStats] = useState({ students: 0, blog: 0, testimonials: 0, courses: 0 });
   const [students, setStudents] = useState<Array<{ id: number; name: string; achievement: string; photo?: string }>>([]);
-  const [blogPosts, setBlogPosts] = useState<Array<{ id: number; title: string; category: string; published: boolean; createdAt: string; tags?: string[] }>>([]);
-  const [testimonials, setTestimonials] = useState<Array<{ id: number; name: string; course: string; rating: number; feedback: string }>>([]);
+  const [blogPosts, setBlogPosts] = useState<Array<{ id: number; title: string; category: string; published: boolean; createdAt: string; tags?: string[]; featuredImage?: string }>>([]);
+  const [testimonials, setTestimonials] = useState<Array<{ id: number; name: string; course: string; rating: number; feedback: string; photo?: string }>>([]);
   const [teachers, setTeachers] = useState<Array<{ id: number; name: string; designation: string; experience: string; photo?: string }>>([]);
-  const [courses, setCourses] = useState<Array<{ id: number; title: string; description: string; category: string; duration: string; price: string; features: string[]; badge: string; level: string; featured: boolean; active: boolean }>>([]);
+  const [courses, setCourses] = useState<Array<{ id: number; title: string; description: string; category: string; duration: string; price: string; features: string[]; badge: string; level: string; featured: boolean; active: boolean; icon?: string }>>([]);
 
   // Modal
   const [modal, setModal] = useState<ModalData>({ type: null });
@@ -42,6 +42,7 @@ export default function AdminPage() {
   const [postContent, setPostContent] = useState('');
   const [postCategory, setPostCategory] = useState('career');
   const [postTags, setPostTags] = useState('');
+  const [postImage, setPostImage] = useState('');
 
   // Settings
   const [settings, setSettings] = useState({ phone: '', whatsapp: '', email: '', address: '', facebook: '', instagram: '', youtube: '' });
@@ -57,10 +58,11 @@ export default function AdminPage() {
   const [formField5, setFormField5] = useState('');
   const [formField6, setFormField6] = useState('');
   const [formRating, setFormRating] = useState(5);
+  const [formImage, setFormImage] = useState('');
 
   // Homepage
   const [homepageData, setHomepageData] = useState({
-    heroSlides: [] as { gradient: string; title: string; tagline: string; intro: string }[],
+    heroSlides: [] as { gradient: string; title: string; tagline: string; intro: string; image?: string }[],
     featuresHeading: 'Why Choose OK ACADEMY?',
     featuresSubheading: 'What makes us the best choice for your computer education',
     features: [] as { title: string; description: string; icon: string }[],
@@ -188,6 +190,7 @@ export default function AdminPage() {
     setFormField5((data?.category as string) || '');
     setFormField6(((data?.features as string[]) || []).join(', '));
     setFormRating((data?.rating as number) || 5);
+    setFormImage((data?.photo as string) || (data?.icon as string) || '');
   }
 
   async function saveModalData(e: React.FormEvent) {
@@ -195,20 +198,20 @@ export default function AdminPage() {
     setLoading(true);
     const h = authHeaders();
     try {
-      if (modal.type === 'student') {
-        const body = { name: formName, achievement: formField2 };
+        if (modal.type === 'student') {
+        const body = { name: formName, achievement: formField2, photo: formImage };
         if (modal.data?.id) await fetch(`/api/students/${modal.data.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
         else await fetch('/api/students', { method: 'POST', headers: h, body: JSON.stringify(body) });
       } else if (modal.type === 'testimonial') {
-        const body = { name: formName, course: formField2, feedback: formField3, rating: formRating, approved: true };
+        const body = { name: formName, course: formField2, feedback: formField3, rating: formRating, photo: formImage, approved: true };
         if (modal.data?.id) await fetch(`/api/testimonials/${modal.data.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
         else await fetch('/api/testimonials', { method: 'POST', headers: h, body: JSON.stringify(body) });
       } else if (modal.type === 'teacher') {
-        const body = { name: formName, designation: formField2, experience: formField3 };
+        const body = { name: formName, designation: formField2, experience: formField3, photo: formImage };
         if (modal.data?.id) await fetch(`/api/teachers/${modal.data.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
         else await fetch('/api/teachers', { method: 'POST', headers: h, body: JSON.stringify(body) });
       } else if (modal.type === 'course') {
-        const body = { title: formName, description: formField2, duration: formField3, price: formField4, category: formField5 || 'general', features: formField6.split(',').map(f => f.trim()).filter(Boolean), active: true };
+        const body = { title: formName, description: formField2, duration: formField3, price: formField4, category: formField5 || 'general', features: formField6.split(',').map(f => f.trim()).filter(Boolean), icon: formImage, active: true };
         if (modal.data?.id) await fetch(`/api/courses/${modal.data.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
         else await fetch('/api/courses', { method: 'POST', headers: h, body: JSON.stringify(body) });
       }
@@ -229,13 +232,13 @@ export default function AdminPage() {
     if (!postTitle.trim()) { alert('Enter post title'); return; }
     setLoading(true);
     const h = authHeaders();
-    const body = { title: postTitle, content: postContent, category: postCategory, tags: postTags.split(',').map(t => t.trim()).filter(Boolean), published: publish, excerpt: postContent.substring(0, 150) };
+    const body = { title: postTitle, content: postContent, category: postCategory, tags: postTags.split(',').map(t => t.trim()).filter(Boolean), featuredImage: postImage, published: publish, excerpt: postContent.substring(0, 150) };
     try {
       if (editingPost?.id) await fetch(`/api/blog/${editingPost.id}`, { method: 'PUT', headers: h, body: JSON.stringify(body) });
       else await fetch('/api/blog', { method: 'POST', headers: h, body: JSON.stringify(body) });
       setShowBlogEditor(false);
       setEditingPost(null);
-      setPostTitle(''); setPostContent(''); setPostCategory('career'); setPostTags('');
+      setPostTitle(''); setPostContent(''); setPostCategory('career'); setPostTags(''); setPostImage('');
       loadData('blog');
     } catch (e) { console.error(e); }
     setLoading(false);
@@ -442,7 +445,7 @@ export default function AdminPage() {
             <h2 className="text-2xl font-bold text-secondary mb-4"><FontAwesomeIcon icon={faBlog} className="mr-2" />Blog Posts</h2>
             {!showBlogEditor ? (
               <>
-                <button onClick={() => { setShowBlogEditor(true); setEditingPost(null); setPostTitle(''); setPostContent(''); setPostTags(''); }} className="mb-6 inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition">
+                <button onClick={() => { setShowBlogEditor(true); setEditingPost(null); setPostTitle(''); setPostContent(''); setPostTags(''); setPostImage(''); }} className="mb-6 inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition">
                   <FontAwesomeIcon icon={faPlus} />New Post
                 </button>
                 {blogPosts.length === 0 ? <p className="text-gray-400 italic">No blog posts yet.</p> : (
@@ -455,7 +458,7 @@ export default function AdminPage() {
                           <span className={`inline-block mt-1 px-2 py-0.5 rounded text-xs ${p.published ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>{p.published ? 'Published' : 'Draft'}</span>
                         </div>
                         <div className="flex gap-2">
-                          <button onClick={() => { setEditingPost(p); setPostTitle(p.title); setPostCategory(p.category); setPostTags(p.tags?.join(', ') || ''); setShowBlogEditor(true); fetch(`/api/blog/${p.id}`).then(r => r.json()).then(d => { if (d.data?.content) setPostContent(d.data.content); }); }} className="p-2 text-primary hover:bg-blue-50 rounded"><FontAwesomeIcon icon={faEdit} /></button>
+                          <button onClick={() => { setEditingPost(p); setPostTitle(p.title); setPostCategory(p.category); setPostTags(p.tags?.join(', ') || ''); setPostImage(p.featuredImage || ''); setShowBlogEditor(true); fetch(`/api/blog/${p.id}`).then(r => r.json()).then(d => { if (d.data?.content) setPostContent(d.data.content); }); }} className="p-2 text-primary hover:bg-blue-50 rounded"><FontAwesomeIcon icon={faEdit} /></button>
                           <button onClick={() => deleteItem('blog', String(p.id))} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
                         </div>
                       </div>
@@ -476,6 +479,7 @@ export default function AdminPage() {
                   </select>
                   <input type="text" placeholder="Tags (comma separated)" value={postTags} onChange={e => setPostTags(e.target.value)} className="flex-1 p-2 border rounded-lg" />
                 </div>
+                <ImageUploader currentImage={postImage} onUpload={setPostImage} label="Featured Image" />
                 <textarea value={postContent} onChange={e => setPostContent(e.target.value)} rows={12} placeholder="Write your blog post content..." className="w-full p-4 border-2 border-gray-200 rounded-lg focus:outline-none focus:border-primary leading-relaxed" />
                 <div className="flex gap-3 mt-4">
                   <button onClick={() => saveBlogPost(false)} disabled={loading} className="inline-flex items-center gap-2 px-5 py-2.5 bg-gray-200 text-gray-700 rounded-lg font-medium hover:bg-gray-300 transition">
@@ -576,9 +580,10 @@ export default function AdminPage() {
                       <input type="text" placeholder="Gradient (e.g. from-[#667eea] to-[#764ba2])" value={slide.gradient} onChange={e => { const s = [...homepageData.heroSlides]; s[i] = { ...s[i], gradient: e.target.value }; setHomepageData(prev => ({ ...prev, heroSlides: s })); }} className="flex-1 p-2 border rounded-lg text-sm focus:outline-none focus:border-primary" />
                       <button onClick={() => { const s = homepageData.heroSlides.filter((_, idx) => idx !== i); setHomepageData(prev => ({ ...prev, heroSlides: s })); }} className="p-2 text-danger hover:bg-red-50 rounded"><FontAwesomeIcon icon={faTrash} /></button>
                     </div>
+                    <ImageUploader currentImage={slide.image} onUpload={val => { const s = [...homepageData.heroSlides]; s[i] = { ...s[i], image: val }; setHomepageData(prev => ({ ...prev, heroSlides: s })); }} label={`Background Image for Slide ${i + 1}`} className="mt-4" />
                   </div>
                 ))}
-                <button onClick={() => setHomepageData(prev => ({ ...prev, heroSlides: [...prev.heroSlides, { gradient: 'from-[#667eea] to-[#764ba2]', title: '', tagline: '', intro: '' }] }))} className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition">
+                <button onClick={() => setHomepageData(prev => ({ ...prev, heroSlides: [...prev.heroSlides, { gradient: 'from-[#667eea] to-[#764ba2]', title: '', tagline: '', intro: '', image: '' }] }))} className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition">
                   <FontAwesomeIcon icon={faPlus} />Add Slide
                 </button>
               </div>
@@ -851,6 +856,15 @@ export default function AdminPage() {
                   </div>
                 </div>
               )}
+              
+              <div className="mb-4">
+                <ImageUploader 
+                  currentImage={formImage} 
+                  onUpload={setFormImage} 
+                  label={modal.type === 'course' ? 'Course Thumbnail / Icon' : modal.type === 'student' ? 'Student Photo' : modal.type === 'testimonial' ? 'Reviewer Photo' : 'Teacher Photo'} 
+                />
+              </div>
+
               <div className="flex gap-3 justify-end mt-6 pt-4 border-t">
                 <button type="submit" disabled={loading} className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary text-white rounded-lg font-medium hover:bg-blue-600 transition">
                   <FontAwesomeIcon icon={loading ? faSpinner : faSave} spin={loading} />Save

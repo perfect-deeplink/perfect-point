@@ -146,11 +146,17 @@ export default function CoursesPage() {
                     {featured && (
                       <div className="relative bg-white rounded-2xl shadow-lg border-2 border-[#3498db]/20 p-6 sm:p-8 flex flex-col">
                         {featured.badge && (
-                          <span className="absolute -top-3 left-6 bg-[#3498db] text-white text-xs font-semibold px-4 py-1 rounded-full">
+                          <span className="absolute -top-3 left-6 bg-[#3498db] z-10 text-white text-xs font-semibold px-4 py-1 rounded-full">
                             {featured.badge}
                           </span>
                         )}
-                        <h3 className="text-xl font-bold text-[#2c3e50] mt-2 mb-4">{featured.title}</h3>
+                        {featured.icon && featured.icon.startsWith('data:image') && (
+                          <div className="w-full h-48 mb-4 rounded-xl overflow-hidden -mt-2">
+                             {/* eslint-disable-next-line @next/next/no-img-element */}
+                             <img src={featured.icon} alt={featured.title} className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <h3 className={`text-xl font-bold text-[#2c3e50] ${featured.icon?.startsWith('data:image') ? 'mt-2' : 'mt-2'} mb-4`}>{featured.title}</h3>
                         <ul className="space-y-2 mb-5">
                           {featured.features.slice(0, 4).map((f, i) => (
                             <li key={i} className="flex items-start gap-2 text-sm text-gray-700">
@@ -192,12 +198,18 @@ export default function CoursesPage() {
                     {others.map((course) => (
                       <div
                         key={course.id}
-                        className="bg-white rounded-2xl shadow-md p-6 flex flex-col hover:shadow-lg transition-shadow duration-300"
+                        className="bg-white rounded-2xl shadow-md p-6 flex flex-col hover:shadow-lg transition-shadow duration-300 relative overflow-hidden"
                       >
                         {course.badge && (
-                          <span className="inline-block bg-blue-100 text-[#3498db] text-xs font-semibold px-3 py-1 rounded-full mb-3 self-start">
+                          <span className={`inline-block bg-blue-100 text-[#3498db] text-xs font-semibold px-3 py-1 rounded-full ${course.icon?.startsWith('data:image') ? 'absolute top-4 left-4 z-10' : 'mb-3 self-start'}`}>
                             {course.badge}
                           </span>
+                        )}
+                        {course.icon && course.icon.startsWith('data:image') && (
+                          <div className="-mx-6 -mt-6 mb-4 h-40 bg-gray-100">
+                             {/* eslint-disable-next-line @next/next/no-img-element */}
+                             <img src={course.icon} alt={course.title} className="w-full h-full object-cover" />
+                          </div>
                         )}
                         <h3 className="text-lg font-semibold text-[#2c3e50] mb-4">{course.title}</h3>
                         <ul className="space-y-2 mb-5">

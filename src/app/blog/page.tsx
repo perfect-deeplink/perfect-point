@@ -13,6 +13,7 @@ interface BlogPost {
   date?: string;
   createdAt?: string;
   featured?: boolean;
+  featuredImage?: string;
 }
 
 
@@ -131,7 +132,14 @@ export default function BlogPage() {
             <>
               {featured && (
                 <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8 grid grid-cols-1 md:grid-cols-[250px_1fr]">
-                  <div className="h-48 md:h-auto bg-gray-100 flex items-center justify-center"><FontAwesomeIcon icon={faNewspaper} className="text-4xl text-gray-300" /></div>
+                  {featured.featuredImage && featured.featuredImage.startsWith('data:image') ? (
+                    <div className="h-48 md:h-auto bg-gray-100">
+                       {/* eslint-disable-next-line @next/next/no-img-element */}
+                       <img src={featured.featuredImage} alt={featured.title} className="w-full h-full object-cover" />
+                    </div>
+                  ) : (
+                    <div className="h-48 md:h-auto bg-gray-100 flex items-center justify-center"><FontAwesomeIcon icon={faNewspaper} className="text-4xl text-gray-300" /></div>
+                  )}
                   <div className="p-6">
                     <span className="inline-block px-3 py-1 bg-gradient-to-r from-warning to-danger text-white rounded-full text-xs font-semibold mb-2">Featured</span>
                     <h3 className="text-xl font-bold text-secondary mb-2">{featured.title}</h3>
@@ -143,7 +151,14 @@ export default function BlogPage() {
               <div className="space-y-4">
                 {otherPosts.map((post, i) => (
                   <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden grid grid-cols-1 md:grid-cols-[200px_1fr] hover:-translate-y-1 transition">
-                    <div className="h-40 md:h-auto bg-gray-100 flex items-center justify-center"><FontAwesomeIcon icon={faNewspaper} className="text-3xl text-gray-300" /></div>
+                    {post.featuredImage && post.featuredImage.startsWith('data:image') ? (
+                      <div className="h-40 md:h-auto bg-gray-100">
+                         {/* eslint-disable-next-line @next/next/no-img-element */}
+                         <img src={post.featuredImage} alt={post.title} className="w-full h-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="h-40 md:h-auto bg-gray-100 flex items-center justify-center"><FontAwesomeIcon icon={faNewspaper} className="text-3xl text-gray-300" /></div>
+                    )}
                     <div className="p-5">
                       <h3 className="font-bold text-secondary mb-1">{post.title}</h3>
                       <p className="text-xs text-gray-400 mb-2"><FontAwesomeIcon icon={faCalendar} className="mr-1" />{formatDate(post.date || post.createdAt)} | {post.category}</p>

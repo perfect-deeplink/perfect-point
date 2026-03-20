@@ -47,12 +47,15 @@ export default function TopStudents() {
               key={student.id}
               className="bg-white rounded-xl shadow-md p-6 text-center hover:-translate-y-1 transition"
             >
-              {student.photo ? (
-                <img
-                  src={student.photo}
-                  alt={student.name}
-                  className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
-                />
+              {student.photo && student.photo.startsWith('data:image') ? (
+                <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={student.photo}
+                    alt={student.name}
+                    className="w-20 h-20 rounded-full mx-auto mb-4 object-cover"
+                  />
+                </>
               ) : (
                 <div className="w-20 h-20 rounded-full mx-auto mb-4 bg-gradient-to-br from-accent to-purple flex items-center justify-center">
                   <FontAwesomeIcon

@@ -15,6 +15,7 @@ export interface SlideData {
   title: string;
   tagline: string;
   intro: string;
+  image?: string;
 }
 
 const defaultSlides: SlideData[] = [
@@ -69,6 +70,11 @@ export default function HeroSlider({ heroSlides }: { heroSlides?: SlideData[] })
           className={`absolute inset-0 flex items-center justify-center bg-gradient-to-br ${slide.gradient} transition-opacity duration-700 ease-in-out ${
             index === current ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'
           }`}
+          style={slide.image ? {
+            backgroundImage: `linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url(${slide.image})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          } : undefined}
         >
           <div className="max-w-4xl mx-auto px-6 text-center text-white">
             <h2
