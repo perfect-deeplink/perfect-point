@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 import { signToken, isAuthenticated } from '@/lib/auth';
 
 export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getInitializedDb();
     const { username, password } = await req.json();
 
     if (!username || !password) {
@@ -58,6 +58,7 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
+    await getInitializedDb();
     if (!(await isAuthenticated(req))) {
       return NextResponse.json(
         { success: false, error: 'Not authenticated' },

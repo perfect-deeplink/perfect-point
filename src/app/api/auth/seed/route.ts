@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 
 export const runtime = 'edge';
 
 export async function GET() {
   try {
-    const db = getDb();
+    const db = await getInitializedDb();
 
     // Delete all existing admins and create a fresh one
     await db.prepare('DELETE FROM admins').run();

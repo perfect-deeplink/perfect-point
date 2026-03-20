@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 import { isAuthenticated, getTokenFromRequest, verifyToken } from '@/lib/auth';
 
 export const runtime = 'edge';
@@ -14,7 +14,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const db = getDb();
+    const db = await getInitializedDb();
     const { currentPassword, newPassword } = await req.json();
 
     if (!currentPassword || !newPassword) {
