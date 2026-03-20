@@ -5,5 +5,5 @@ pages_build_output_dir = ".vercel/output/static"
 
 [[d1_databases]]
 binding = "DB"
-database_name = "ok-academy-db"
-database_id = "PLACEHOLDER_REPLACE_WITH_ACTUAL_DB_ID"
+database_name = "db-perfect-link"
+database_id = "8f524f1a-bba3-424a-92f4-4d24d716ff23"
