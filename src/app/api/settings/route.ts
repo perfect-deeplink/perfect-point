@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 
 export const runtime = 'edge';
 
 export async function GET() {
   try {
-    const db = getDb();
+    const db = await getInitializedDb();
     let row = await db.prepare('SELECT * FROM site_settings LIMIT 1').first();
 
     if (!row) {
@@ -41,7 +41,7 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    const db = getDb();
+    const db = await getInitializedDb();
     const body = await req.json();
     const existing = await db.prepare('SELECT id FROM site_settings LIMIT 1').first<{ id: number }>();
 

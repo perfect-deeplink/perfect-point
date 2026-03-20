@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 
 export const runtime = 'edge';
 
 export async function POST(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getInitializedDb();
     const { email } = await req.json();
 
     if (!email) {

@@ -112,13 +112,13 @@ export default function HeroSlider({ heroSlides }: { heroSlides?: SlideData[] })
                 <FontAwesomeIcon icon={faUserPlus} className="w-4 h-4" />
                 Enroll Now
               </Link>
-              <a
-                href="tel:+919876543210"
+              <Link
+                href="/contact"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold transition border-2 border-white text-white hover:bg-white/20"
               >
                 <FontAwesomeIcon icon={faPhone} className="w-4 h-4" />
                 Call Now
-              </a>
+              </Link>
             </div>
           </div>
         </div>

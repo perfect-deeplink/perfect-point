@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 
 export const runtime = 'edge';
@@ -26,7 +26,7 @@ function mapCourse(row: Record<string, unknown>) {
 
 export async function GET() {
   try {
-    const db = getDb();
+    const db = await getInitializedDb();
     const { results } = await db
       .prepare('SELECT * FROM courses WHERE active = 1 ORDER BY sort_order ASC, created_at DESC')
       .all<Record<string, unknown>>();
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const db = getDb();
+    const db = await getInitializedDb();
     const body = await req.json();
     const now = new Date().toISOString();
 

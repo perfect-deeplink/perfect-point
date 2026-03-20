@@ -64,39 +64,13 @@ export default function TestimonialsPage() {
 
   return (
     <>
-      {/* Hero */}
       <section className="bg-gradient-to-br from-accent to-purple text-white py-16 px-4 text-center">
         <h1 className="text-3xl md:text-4xl font-bold mb-4">Success Stories from OK ACADEMY</h1>
         <p className="text-lg opacity-90 mb-8">Hear from our students who transformed their careers</p>
-        <div className="flex flex-wrap justify-center gap-8">
-          {[{ val: '4.8/5', label: 'Student Rating' }, { val: '5000+', label: 'Students Trained' }, { val: '85%', label: 'Placement Rate' }, { val: '15+', label: 'Years Trusted' }].map((s, i) => (
-            <div key={i} className="text-center">
-              <h3 className="text-3xl font-bold">{s.val}</h3>
-              <p className="opacity-90 text-sm">{s.label}</p>
-            </div>
-          ))}
-        </div>
       </section>
 
       <main className="max-w-7xl mx-auto px-4 py-8">
-        {/* Video Testimonials */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-secondary mb-2"><FontAwesomeIcon icon={faVideo} className="text-primary mr-2" />Video Testimonials</h2>
-          <p className="text-gray-500 mb-6">Watch our students share their experiences</p>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {[{ name: "Rahul's Web Development Journey", desc: 'From Kurawli to Delhi IT Company' }, { name: "Priya's Graphic Design Success", desc: 'Now working as freelance designer' }, { name: "Amit's Tally Career Growth", desc: 'Placed in Mainpuri CA firm' }].map((v, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden">
-                <div className="h-44 bg-secondary flex items-center justify-center relative cursor-pointer group">
-                  <FontAwesomeIcon icon={faPlayCircle} className="text-5xl text-white group-hover:scale-125 transition" />
-                </div>
-                <div className="p-4">
-                  <h3 className="font-bold text-secondary text-sm">{v.name}</h3>
-                  <p className="text-xs text-gray-400">{v.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+
 
         {/* Written Testimonials */}
         <section className="mb-12">
@@ -129,62 +103,7 @@ export default function TestimonialsPage() {
           )}
         </section>
 
-        {/* Success Stories */}
-        <section className="mb-12">
-          <h2 className="text-2xl font-bold text-secondary mb-6"><FontAwesomeIcon icon={faTrophy} className="text-primary mr-2" />Featured Success Stories</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-xl shadow-md overflow-hidden md:col-span-2 grid grid-cols-1 md:grid-cols-2">
-              <div className="h-48 md:h-auto bg-gray-100 flex items-center justify-center"><FontAwesomeIcon icon={faGraduationCap} className="text-6xl text-gray-300" /></div>
-              <div className="p-6">
-                <h3 className="text-lg font-bold text-secondary mb-2">From Farm to IT Park: Ravi&apos;s Journey</h3>
-                <div className="flex gap-4 text-xs text-gray-400 mb-3">
-                  <span><FontAwesomeIcon icon={faGraduationCap} className="mr-1" />Web Development</span>
-                  <span><FontAwesomeIcon icon={faCalendar} className="mr-1" />2023 Batch</span>
-                </div>
-                <p className="text-gray-600 text-sm italic mb-4">&ldquo;Coming from a farming family in Kurawli, I never thought I could work in IT. OK ACADEMY gave me the skills and confidence.&rdquo;</p>
-                <div className="text-sm space-y-1">
-                  <p><strong>Before:</strong> Helping in family farm</p>
-                  <p><strong>After:</strong> Web Developer at Tech Solutions, Noida</p>
-                  <p><strong>Salary:</strong> ₹45,000 per month</p>
-                </div>
-              </div>
-            </div>
-            {[
-              { title: "Housewife to Accountant: Suman's Transformation", text: 'OK ACADEMY\'s flexible batches allowed me to learn Tally while managing home.', tags: ['Tally Course', 'Career Comeback'] },
-              { title: "College Student to Freelancer: Vikas's Story", text: 'Started freelancing in 3rd year, now earning ₹25,000 monthly.', tags: ['Web Development', 'Freelancing'] },
-              { title: "Government Job Success: Neha's Achievement", text: 'CCC course helped me clear the computer test for UP Police.', tags: ['CCC Course', 'Government Job'] },
-            ].map((s, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-md overflow-hidden">
-                <div className="h-40 bg-gray-100 flex items-center justify-center"><FontAwesomeIcon icon={faGraduationCap} className="text-4xl text-gray-300" /></div>
-                <div className="p-5">
-                  <h3 className="font-bold text-secondary mb-2">{s.title}</h3>
-                  <p className="text-gray-600 text-sm mb-3">&ldquo;{s.text}&rdquo;</p>
-                  <div className="flex flex-wrap gap-2">{s.tags.map(t => <span key={t} className="px-3 py-1 bg-blue-50 text-primary rounded-full text-xs">{t}</span>)}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
 
-        {/* Placement Partners */}
-        <section className="bg-gray-50 p-8 rounded-xl mb-12">
-          <h2 className="text-2xl font-bold text-secondary mb-2 text-center"><FontAwesomeIcon icon={faHandshake} className="text-primary mr-2" />Where Our Students Work</h2>
-          <p className="text-center text-gray-500 mb-6">Our students are placed in companies across Mainpuri and beyond</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { icon: faBuilding, title: 'Local Businesses', desc: 'CA Firms, Printing Press, Schools' },
-              { icon: faCity, title: 'District Level', desc: 'Government Offices, Banks' },
-              { icon: faLaptopHouse, title: 'Remote Work', desc: 'Freelancing, Remote IT Jobs' },
-              { icon: faIndustry, title: 'Metro Cities', desc: 'Delhi NCR, Bangalore, Pune' },
-            ].map((p, i) => (
-              <div key={i} className="bg-white p-5 rounded-xl text-center">
-                <FontAwesomeIcon icon={p.icon} className="text-3xl text-primary mb-3" />
-                <h3 className="font-bold text-secondary text-sm mb-1">{p.title}</h3>
-                <p className="text-xs text-gray-400">{p.desc}</p>
-              </div>
-            ))}
-          </div>
-        </section>
 
         {/* Add Testimonial Form */}
         <section className="bg-gradient-to-br from-gray-50 to-gray-100 p-8 rounded-xl">

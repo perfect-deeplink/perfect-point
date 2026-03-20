@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 
 export const runtime = 'edge';
@@ -24,7 +24,7 @@ function mapContact(row: Record<string, unknown>) {
 
 export async function POST(req: NextRequest) {
   try {
-    const db = getDb();
+    const db = await getInitializedDb();
     const body = await req.json();
     const now = new Date().toISOString();
 
@@ -75,7 +75,7 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const db = getDb();
+    const db = await getInitializedDb();
     const { results } = await db
       .prepare('SELECT * FROM contacts ORDER BY created_at DESC')
       .all<Record<string, unknown>>();

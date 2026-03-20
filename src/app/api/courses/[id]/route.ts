@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 
 export const runtime = 'edge';
@@ -30,7 +30,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
-    const db = getDb();
+    const db = await getInitializedDb();
     const row = await db
       .prepare('SELECT * FROM courses WHERE id = ?')
       .bind(id)
@@ -65,7 +65,7 @@ export async function PUT(
     }
 
     const { id } = await params;
-    const db = getDb();
+    const db = await getInitializedDb();
     const body = await req.json();
     const now = new Date().toISOString();
 
@@ -125,7 +125,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const db = getDb();
+    const db = await getInitializedDb();
     const result = await db
       .prepare('DELETE FROM courses WHERE id = ?')
       .bind(id)

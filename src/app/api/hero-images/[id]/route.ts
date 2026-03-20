@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getDb } from '@/lib/db';
+import { getInitializedDb } from '@/lib/db';
 import { isAuthenticated } from '@/lib/auth';
 
 export const runtime = 'edge';
@@ -17,7 +17,7 @@ export async function DELETE(
     }
 
     const { id } = await params;
-    const db = getDb();
+    const db = await getInitializedDb();
     const { meta } = await db.prepare('DELETE FROM hero_images WHERE id = ?').bind(id).run();
 
     if (!meta.changes) {
